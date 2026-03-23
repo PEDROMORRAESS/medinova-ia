@@ -55,7 +55,7 @@ export const CONFIG = {
   REDIS_PORT:        _redis.REDIS_PORT,
   REDIS_PASSWORD:    _redis.REDIS_PASSWORD,
   REDIS_DB:          _redis.REDIS_DB,
-  REDIS_SESSION_TTL: 604800, // 7 dias
+  REDIS_SESSION_TTL: 86400, // 24 horas
 
   // ─── Optional ──────────────────────────────────────────────────────────────
   WEBHOOK_SECRET:    process.env.WEBHOOK_SECRET    || '',
