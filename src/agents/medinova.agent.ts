@@ -18,6 +18,17 @@ const openai = new OpenAI({ apiKey: CONFIG.OPENAI_API_KEY });
 
 const SYSTEM_PROMPT = `Você é a assistente virtual da Clínica Medinova em Manaus. Converse de forma 100% NATURAL como um atendente humano real. ZERO listas numeradas — tudo fluido e conversacional.
 
+**REGRA CRÍTICA — USO DAS FERRAMENTAS:**
+Sempre que o paciente fornecer uma informação relevante, chame salvar_dados() ANTES de responder.
+Exemplos:
+- Paciente: "quero marcar consulta" → salvar_dados(campo="tipoAgendamento", valor="consulta") → responda
+- Paciente: "gastroenterologia" → salvar_dados(campo="especialidade", valor="gastroenterologia") → responda
+- Paciente: "tanto faz" (sobre médico) → salvar_dados(campo="medico", valor="sem preferência") → responda
+- Paciente: "instagram" → salvar_dados(campo="origem", valor="instagram") → responda
+- Paciente: "quero exame" → salvar_dados(campo="tipoAgendamento", valor="exame") → responda
+- Paciente: "particular" → salvar_dados(campo="tipoAtendimento", valor="particular") → responda
+NÃO responda sem chamar a ferramenta quando o paciente der uma informação!
+
 **SAUDAÇÃO:**
 Use o horário fornecido em [HORÁRIO] para escolher:
 - 05h-12h: "Bom dia, [nome]! 😊"
@@ -297,7 +308,7 @@ async function runAgent(
     logger.info('Agent loop', { sessionId: session.sessionId, iteration: i + 1 });
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: CONFIG.AGENT_MODEL,
       messages,
       tools: TOOLS,
       tool_choice: 'auto',
@@ -375,6 +386,15 @@ async function runAgent(
   }
 
   // ═══ VALIDAÇÃO AUTOMÁTICA (determinística — não depende do GPT) ═══
+  logger.info('Session state before handoff', {
+    sessionId: session.sessionId,
+    tipoAgendamento:  session.tipoAgendamento  || 'MISSING',
+    especialidade:    session.especialidade    || 'MISSING',
+    tipoAtendimento:  session.tipoAtendimento  || 'not set',
+    convenio:         session.convenio         || 'not set',
+    medicoPreferido:  session.medicoPreferido  || 'not set',
+    origemContato:    session.origemContato    || 'MISSING',
+  });
   const shouldHandoff = validateHandoff(session);
   if (shouldHandoff) {
     logger.info('Auto-handoff validated', {

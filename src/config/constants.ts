@@ -48,7 +48,7 @@ export const CONFIG = {
 
   // ─── OpenAI ────────────────────────────────────────────────────────────────
   OPENAI_API_KEY: requireEnv('OPENAI_API_KEY'),
-  AGENT_MODEL:    process.env.AGENT_MODEL || 'gpt-4o-mini',
+  AGENT_MODEL:    process.env.AGENT_MODEL || 'gpt-4o',
 
   // ─── Redis ─────────────────────────────────────────────────────────────────
   REDIS_HOST:        _redis.REDIS_HOST,
